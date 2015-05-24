@@ -1,0 +1,40 @@
+---
+title: "Practical machine learning course project"
+author: "Rafael Castrillo"
+output: html_document
+---
+
+This document presents the model used to predict the way a barbell lift was performed, based on data from accelerometers on the belt, forearm, arm, and dumbell for six test participants. The data is available in the website: http://groupware.les.inf.puc-rio.br/har.
+
+First of all, the data was read from the working directory. The dataset is high dimensional, and includes 19622 observations for different repeats of weight lifting. The original authors focused on the summary statistics of each weight lift, and thus there are several variables in the data that only have values for the last observation in each "cycle". For this model, we will only use the actual accelerometer readings, so we removed the variables that included summary statistics.
+
+```{r, cache=TRUE}
+setwd("~/data/Machine Learning")
+train<-read.csv("pml-training.csv",na.string=c("#DIV/0!","","NA"),row.names=1)
+test<-read.csv("pml-testing.csv",na.string=c("#DIV/0!","","NA"),row.names=1)
+na<-apply(train,2,function(x){sum(is.na(x))})
+train<-train[,na==0]
+train<-train[,-c(2:7)]
+```
+
+We proceded to train several models, including CART, knn and random forest. The last two provided the most promissing results, and we ended up choosing the random forest model for this assignment. 
+
+The model was generated using the caret package, and train control was done using 10-fold cross validation. The algorithm was slow to converge, so we used 200 trees to speed up the process a bit.
+
+
+```{r, cache=TRUE}
+set.seed(1989)
+library(caret)
+ctrl<-trainControl(method="cv",number=10)
+mod1<-train(classe~.,data=train,method="rf",trControl=ctrl,ntrees=200)
+```
+
+
+The results of the training process can be summarized below:
+
+```{r}
+summary(mod1)
+```
+
+
+
