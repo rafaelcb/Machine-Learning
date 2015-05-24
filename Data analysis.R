@@ -8,6 +8,14 @@ train<-train[,-c(2:7)]
 
 library(caret)
 ctrl<-trainControl(method="cv",number=10)
-mod1<-train(classe~.,data=train,method="rf",trControl=ctrl,ntrees=200)
-library(rpart.plot)
-prp(mod1$finalModel)
+mod1<-train(classe~.,data=train,method="knn",trControl=ctrl)
+mod2<-train(classe~.,data=train,method="rf",trControl=ctrl,ntrees=200)
+
+summary(mod1)
+summary(mod2)
+
+preds<-predict(mod2)
+tab<-table(preds,train$classe)
+prop.table(tab)
+sum(diag(tab))/sum(tab)
+
